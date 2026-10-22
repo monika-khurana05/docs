@@ -1,0 +1,414 @@
+there is a slight change in how the payments are to be processed right so in japan uh what we do is
+we even send the book to book payments out to clearing right and then these payments come
+back as incoming payments and are processed uh in cdft okay so both book to book and non-book
+to book are treated the same way but in japan what we do is we create uh separate patches for
+book to book and one book to book right for non-book to book we debit the customer credit
+the nostril account and for book to book we debit the customer and credit the internal
+credit account right and then both these patches are processed separately and then sent out
+to clearing okay um so this is basically the processing for japan for book to book considered
+payments now coming to uh australia right australia is basically has a bit of a difference because
+in australia we process the book to book payments directly into uh city right we don't send this
+payment out to clearing okay so traditionally for ip what would happen is uh once we receive a payment
+from customer uh right and we identify both debtor and greater accounts are uh city customers we
+directly debit the city customer and create the city customer and the payment flow ends there right
+we don't send that payment out to clearing okay so it's already implemented for ip and same thing we
+want to also implement for ach okay but the complication here is we have to implement this for
+consolidation flow also right item is already there but consolidation flow is what we have to basically
+implement right and what we agreed is we will um like leverage the japan flow which i'll basically come
+come on that in a bit but but we want to leverage the japan flow and
+uh and have uh and have australia specific nuance to build um into it okay so i'll just quickly also
+get the japan or sorry the australia flow which is basically agreed uh with the uh product okay let me
+just quickly get that out so that yeah okay okay so the high level solution what we basically agreed
+for australia is we will uh follow a approach which is similar to japan which is two debits to customer
+right so when we have a when we identify the payment as book to book payments we again
+um create two separate batches one for book to book uh uh batch and another one for a non-book to
+book batch right and these two batches will perform their own ear marking uh flow so two two separate
+batches and two ear marking flows uh here until it is like japan okay and once we have the positive
+earmark uh we again process this two uh separately so non-book to book payments uh we already implemented
+right the same flow for all the countries we send that out to clearing right now in australia the book
+to book payments are not sent out to clearing right so then once the earmarking happens what we do is
+what you want to do basically is we want to debit the customer and then credit an internal uh credit account
+right again what japan does okay right so until here it is basically uh kind of similar to japan
+but the next bit right now next bit what we do we create another posting entry where we debit the
+internal account and then credit the city customer this would be in the itemized fashion okay so this is
+why basically your flow uh segregates between japan and australia consolidation okay so so this is
+basically uh the high level design and we created the stories but then um what what we also wanted to
+do is have the scenarios basically uh walkthrough okay so scenarios what we created for our non-book-to-book
+consideration flow similar way i have tried to create the scenarios for the book to book payments also okay
+any any questions so far on the high level working of the scenario of this uh book to book payments
+i have one question can you go back to email yeah yeah i'll go back
+okay so the one you have highlighted okay debit internal and credit city customer this is the itemized
+posting of for each payment each credit each payment correct and first one debit customer credit internal
+it is at the bachelor bachelor correct yes
+okay so
+okay and earmarking is done at the batch level patch level correct yeah
+do a batch level posting and then posting on every transaction
+correct correct correct okay
+okay all right so uh i created a few scenarios now i created here only for a few but even the uv flow is
+going to be uh similar yeah so i i have a few questions um and this is uh sorry sorry sorry go back
+and this is uh we are talking only about the concentrated or itemized as well this is only for
+for considered itemized we'll work okay for considered right we have yeah yeah only for considered okay
+perfect perfect thank you okay okay hello uh uh can you hear me yeah i cut yeah yeah yeah yeah i uh amir and
+yeah so what is the uh uh uh what is this new requirement about i'm sorry i just joined
+uh so this is uh australia um book to book consolidated payments okay okay um right so in australia the book
+to book payments are processed within city we don't send this payment out to clearing right okay so even
+for ip when we receive a book to book payments we directly debit the city customer and credit the city
+customer and the payment flow ends there right we don't send this payment out to the clearing
+right all right okay um and similar thing we want to also implement for ach right uh itemized
+ach itemized we are okay but ach consolidation is basically a uh not a problem but a new
+new solution is basically what we want to discuss here okay so what the product uh wants ideally is
+for if if a badge contains say both book to book and non book to book payments right the customer should
+only get debited once okay and then we should be managing the um credits right um but in in in this
+scenario currently we don't have that capability like so what we do is even for japan ech right we
+recreate uh first of all we segregate the payments uh into book to book and non book to book right
+and then we create a separate batch for book to book payments and separate batch for non book to
+book payments okay correct yeah and these two separate patches will basically have two separate
+earmarking uh flows triggered right and uh after we receive a positive earmarking uh response for both
+these patches the non book to book payments will flow uh as be you as what we have developed right
+uh but for japan the book to book what we do is we debit the customer and then we credit a uh internal
+account right and then that payments are sent to clearing okay and from clearing right an incoming
+payment comes in and incoming payments go to ctft where they get processed this is basically the japan
+flow okay right but for australia what we want is we don't want to send this book to book payments to
+clearing we want to settle them internally okay correct that's two different different accounts
+not one right different different accounts correct different different accounts okay so here what we
+have uh agreed and proposed is we'll sort of leverage the japan flow okay so how it works for
+australia is of course if we receive um payments or a patch with the book to book and non book to
+documents we again create two separate patches one for book to book and then perform separate year
+marking for those two batches right once we receive positive year marking for those batches
+the non book to book payment flow will remain as it is what we have developed but for book to book
+great uh because these payments are not sent to clearing what we first do is we debit the customer
+and credit an internal account that would be in the consolidated fashion okay and second posting
+entry would be uh once this entry is successful uh posting successful then we debit the internal account
+and credit the individual customer account in itemized fashion so this is basically a change
+between australia and japan let me get this right so basically when you debit the customer initially
+where will you put that money in uh into an internal account to an internal account okay from that
+internal account uh then you have to do two uh at least one more debit to the nostro account no no
+you need to debit from this internal account put it into nostro correct for no this is only for your
+book to book to book payments um non-book to book payments we debit the customer and credit the
+nostro account as we do today there is no change in this okay okay okay so so basically what we are then
+doing is in as we do in japan japan we actually deposit it to an internal account from there we have
+another process that takes it and deposits to the client account here that part of the flow we have to
+implement as a separate uh another uh debit to that internal and credit to the customer account also
+we have to implement uh additionally that is right that australia that's what we are talking about
+correct okay but there is nothing so we do right in japan also we do the uh we specify the city uh credit
+account in that case in posting yeah in posting uh we only do one thing uh right monica that is uh uh we
+debit from the uh from the uh client account right and deposit it to an internal account to that much
+extent we do what we don't do is from that internal account depositing it to the ultimate client uh
+on the creditor side that we don't do today in japan and in japan it is happen uh in different uh flow
+means clearing sent to the directly to um some other uh capability and it will go to exchange incoming
+so for japan once we send the transactions out to clearing so we send it to the gateway which is
+zbank which is city internal system okay for processing of the ach incoming transaction we have a different
+product processor which is called as ctft so zbank look at the beneficiary bank now beneficiary bank is
+city so it routes this transaction to ctft okay and and and now and now depending the internal account
+and crediting client client that happens as a part of a ctft product person okay got it okay and if we
+get do we get the reject clearing reject in that case yes we can okay okay and then we need to reverse
+that payment good yeah so we release the year mark right so that that flow is same so if suppose
+scenario is basically we debit the client we send the transaction out to zbank zbank sent to ctft now the
+credit account if it has a no credit posting description or the account is closed by that for
+that period that particular scenario we will get the negative acknowledgement back and we will take
+the appropriate action okay and in australia we don't need to do because we are not sending to clearing
+we're just posting we are doing and there is a additional stuff which g bank is sending to city
+ft for the incoming transaction right so it will do the direct posting here in a you know but here here
+in eu whatever the ctft is doing that is internally we are doing right so even if even if when we start
+crediting to client ideally we should not get any posting restrictions ideally because for a book to
+book transaction in australia we do a credit uh posting restriction checks even before at the time of
+of validation itself so there is a less chance but still there is a chance that in our side we check
+we find the no posting ratio of great side we sent that we then we start doing the posting by that
+time flixcube has updated and got the posting this in arcade so that's the hk scenario which can happen
+and we have to take the same action same action what we are taking it from japan
+okay and if flex is uh uh sending because there will be a two posting
+one at the batch level and another at the transaction level yeah so if we get
+reject from the transaction level we need to reverse from the batch reverse yeah correct it it depends
+if it's earmark we have to release here if it's posted ue posted then we have to reverse okay
+so we'll come to those scenarios uh monica i've just listed down the scenarios we can discuss that okay
+okay so coming back to the scenarios then right so i have created like three to four scenarios uh
+for this flow um first is your vanilla so basically everything goes to complete
+so in this scenario we have say we receive um 10 ash payments into the file and the file has
+combination of book to book and non-book to book so five payments are book to book and five payments
+are non-book to book right all the payments receive no hit from sanctions and uh we receive
+DR mark success right uh for those two uh patches which we created we send this out we send the
+payment out to clearing uh for non-book to book and we received an ag for non-book to book and positive
+posting response is received for all the book to book payments right so this is basically your vanilla
+uh scenario okay so now here what i have done is i have just uh uh mentioned the processing of the
+book to book payments right because non-book to book payments will get processed as usual okay
+so as we as i discussed we have two separate patches which are created one for book to book one for
+non-book to book and non-book to book processing is basically as per uh previously agreed what is
+implemented okay now this flow is only for your um book to book batch and book to book payments okay
+so same thing because we we are going to process this is two different batches um once we receive a
+sanctioned response for the first transaction of book to book batch then we we start the
+processing until then your batch is in uh balance check with and transaction is in pending uh balance check okay
+once we receive the first uh uh no hit response right and for next uh five payment uh then you
+basically wait for the next um five payments to come as a no hit uh until then the batch is still in
+weight and your transaction is in pending balance check same configuration even we'll have here uh for weight of
+30 minutes until 30 minutes we'll wait if all transactions have received your um no hit okay
+once we uh yeah once we once the configuration is passed and we have uh no hit for all the
+transactions right then we do your earmarking step right again the same similar to what we have for
+non-book to book we we send the earmark request right so the uh bsm for the batch is in balance check
+ready and the transaction is still in pending uh balance check pending okay uh we send out the
+conservative booster consider earmarking request for all five transactions um the batch is in balance
+check request and an individual is in uh pending balance check pending then we receive positive year
+mark for the one book for the book to book batch and then uh the batch become bad check earmarked
+and your transition is in pending year mark okay now here basically the flow uh gets a bit uh tricky or
+different right so here we first send out a um post a few posting requests now this posting request is
+going to debit the customer account and credit the intel account now this is going to be a consolidated
+posting request right so i've kept the uh bsn shared as posting a few requests and uh individual
+transaction would be pending posting pending actually can i interrupt here right so in the case of
+a few posting we first do the clearing and then only do the posting correct correct correct but here we
+don't are not going to send the clearing but because this is also following the fu model the way i
+recommend is because you have already earmarked correct right so that means on the debit side you are
+sure of everything happening properly right so what we need to do is at this time we you you we kind of
+informed the uh we mark the successful uh at the batch level we have completed the earmarking then we
+informed the uh state manager state manager now is ready to do the individual transaction level processing
+it should go ahead and uh and do the uh posting to the other client based on that you got what i'm saying so
+basically it is assured of the city side is now assured of having the money from the debitter so
+it can go ahead and do the individual posting you got what i'm saying just like same as what we do for
+clearing today okay so we we do that and then go back and inform uh the if you can say that you can go ahead
+and uh complete it so it will do the same thing so that way it will be cleaner you got what i'm saying
+so i get your point but we have not we don't have money into that internal
+credit account how will we debit that you have that by way of year one
+no i have the money into my sorry see see once you know year part pretty much you you are assured of the funds
+right so you can go ahead and do the posting on the other side and then complete the posting here
+right say for example uh like let me ask you this way if uh in the case of fq posting we have this
+scenario where you give the money uh you send the money to the clearing today but because of the value
+date check you may do the posting three days later for fq what how will that work for the
+future the document is okay okay okay okay okay okay okay okay yeah i got the context point okay see
+even in japan case even in japan case okay take a consider this japan case okay so we
+are earmarking the account correct debit account we are earmarking we are sending the funds out to
+uh we are sending a transaction to zbank to ctft correct now ctft is going to debit the
+internal account credit the client and then send it to the acknowledgement bank
+that isn't it so so at the time of actual posting to credit customer
+the internal account is not actually credited so internal account
+operations operations or product need to ensure that it can go into the negatives negative or it
+always has balance correct so we have to choose such account it has enough security it's not sure
+to choose just that account it's it's actually basically they need to ensure that account
+is marked for going into a negative negative right it's finally at the end of the day reconciliation
+it should be zero there should not be any amount left correct either it should be negative or not
+it's always zero that's what the reconciliation happens at the end of the day agreed agreed yeah
+that that can be implemented only thing is that account basically we have to make sure that account
+can support negative balance otherwise we end up having that's the internal account
+okay so i think what you're saying basically is after the earmark we do the credit side leg of the
+um correct correct correct so basically it comes to the uh state manager where
+at the individual transaction level the earmarking is successful it can go ahead with the clearing or in
+the case of book to book go ahead with the credit side posting at the individual transaction level
+right okay
+and once that is successful it goes back to the badge and then the badge does exactly the way it does today
+whatever it is today it is today exactly yeah so uh we will mark complete after a uh internal credit
+account posting done for all uh transaction correct correct okay so after you do a credit posting it your
+transactions move to complete your badge will wait for all the transaction to either go to complete or
+rejected once it is done then our badge will then either whatever the release your mark posting based on
+how many is that working so our flow will remain same yeah at the batch level okay great let me just copy
+that i'll just try to put the batch level there will be no change instead of clearing we are doing the
+internal posting credit account first so after we positive earmark right so we basically have to do a
+credit posting right so let me just uh insert that
+let's go i have
+okay so basically just let's not put this this will be balance here
+okay so i'll put the previous related but then here once we send the itemized credit
+what do we put the batch in posting fpu only
+yes the the batch will remain in posting f it will remain in posting f you until the individual
+transactions are done with their processing okay so once we send the um request it will be posting a few
+wait basically it will wait in that yeah posting a few wait okay so basically we'll have posting a few wait
+right and individual would be um pending posting pending right and then once we receive uh all positive
+response from flags right it will still be in wait but the individuals will then go to complete okay no no
+it should not go to complete right uh because it's not yet done with the real posting for the clear
+so you got to come up with something new status for the book like it is just like the clearing is
+complete so it is complete uh b2b or something in the uh what do you call i i mean it can be complete
+but pending you know what i mean on it is complete on the primary status because now the the book to
+book side is completed the the credit side is completed so it's complete but uh sub status is pending
+because because the right and then we send the posting request for a few uh the debit posting
+request for a few it will still be complete posting pending and this will be request sent right and once
+we receive a positive it will be uh complete posting complete posting complete and that's stage
+uh status will also posting completely but should basically instead of sent to clearing we will
+be marking the transaction to come complete okay okay now where this looks a bit fine okay now here
+okay so this is basically a vanilla flow right where everything goes into complete there can be
+another scenario where your uh debit posting fails so so that would so we have here mark the funds
+if the debit posting fails it's all standard scenario you have to look at credits uh postings uh sales
+first no but here no because here we already created the customer right sorry yeah i'm just thinking okay
+instead of complete do we want to put some intermediate status because our badge will look at the completed
+rejected right and once it is complete if we mark it to complete and the posting failed we cannot reject
+because that complete is the final status so we may introduce the intermediate status and not directly
+go to complete before the posting is done because what what what will you do if the if you mark the
+transaction as complete posting pending and then posting failed you you cannot yeah you cannot but but
+you cannot then go to the rejected transaction to rejected and release the year mark of course we cannot
+release the year mark because it was already created to the customer so it has to be a manual action
+like posting failed right we have posting failed but then we are introducing even for the
+internal accounts we are adding the risk or the work for the operations to manually do the posting there
+right instead instead of that if we just let me instead of that if we introduce a status like sent to
+clearing instead of sent to clearing we maybe put the status as pending book to book or something okay
+just i'm making it now when the posting is actually done we move it to complete if posting is failed
+we mark the transaction to reject it so that when we are taking the action on batch we exactly know how
+many postings we have successfully done how many are the rejections and then no manual intervention is
+required but if you first mark templates and posting failed there is a manual intervention required
+by the ops i i mean i mean there is one risk here that is because you have already deposited the money
+in the credit side right so the the creditor can do anything he wants at that point you cannot
+reverse that we haven't deposited we haven't deposited here actually i'm saying okay the transaction
+there's painting book to go with sub status as posting painting when you are sending the request to
+flex for doing the credit posting yeah that is pending that is already pending uh amit once we get
+no pending and posting pending once we get the successful response from flex then only we are moving to
+complete if we can't reject then we are posting here we are rejecting we are not marking complete yeah correct so
+so we are making sure that we are moving our transaction to complete only when actual credit posting is done to the client
+so there is no risk okay maybe let me ask you this way right yeah see
+you have to do two posting there is no going around right you yeah yeah one is on the debit side one is
+on the credit side and when you do two uh two posting no matter whatever we do one of them can fail
+right so whichever is the first one to fail you can do something about it to the next one accordingly
+so say for example credit credit first let us say credit fail then what do you do you
+you just uh reverse the uh release the year mark you consider it as rejected so that if you
+posting simply will add the money to the rejected amount and remove remove that from the year mark
+correct correct so that is that is one situation right if you do credit posting first but let us say
+you do the debit posting first right you do the debit posting first that means you already debited
+you put the money back into the city account right after that you you are trying to do the credit posting
+and the credit posting can fail even at that point right and if it fails and then if it fails in the
+irreversible fashion then you have to put the money back to the uh to the uh debitor
+right so that has to be a separate reversal transaction that's the only way like what we do
+correct correct correct correct exactly if you want to go that route then what we need to do is after
+the fq posting is done uh sorry uh not fq posting after the uh the year marking is done when the
+control comes back to the state manager doesn't do the posting to the credit side it simply marks
+so go ahead and do the posting to the uh do fu posting immediately to the uh uh batch and batch
+will complete it and then come back uh the control will come back but here in the status will remain
+as pending posting uh posting pending basically you know the book to book will remain the spending
+posting pending and only after a few is done you want to do the posting here that is it's just a purely
+how the business wants to do it based on the bigger watches if that's the way they want to we want to
+handle fine but then only situation we have to keep in mind is that uh a few posting may not happen on
+the same day it may happen three days later also no it's not different it would it's a book to book and
+it's a book to book transaction right so in australia it's uh anyway it's the same day processing
+okay okay okay so it will immediately happen and then we come and try to do it and then it goes
+like a du posting it will be a little bit more uh uh actually there is no difference between du posting
+no difference no difference for us for us then then we are mimicking whatever happening with the clearing
+same we are mimicking for the book to book only things said instead of sent to clearing we have to put
+some different status you can just simply keep it as pending posting pending and then respond back to
+the uh to the path saying that go ahead and do the posting yeah you know what if you just maybe maybe
+pending posting yeah i i'm with you but maybe i just want to go back and check all the transactions
+where currently in which scenario we are putting pending posting pending so that if we want to bifurcate
+between the two pending posting painting scenarios it's better to add a new status substitute
+new status
+but if we if we are currently not using pending posting pending assets then we can
+we can use it we do have it in the context of uh du du posting we will have it we do have right so it's it's
+just help us to bifurcate between the two say if someone want to look at it or getting a report or
+some things it's better to keep the different status but but let's let's work on it uh yogesh we can go
+through we can understand what is the best we want to add new status or we can use the pending posting
+yeah because even for the um debit posting first right i kept as pending posting pending throughout
+right so until we receive the credit um posting right then only i was marking it to the complete
+otherwise i was keeping it to pending posting pending throughout so that i don't introduce a new
+that also works yeah
+only only the question here is right um so that that we understood that okay credit
+our internal account has to allow negative balance that is fine
+right yeah um then we basically create the customer right now if you do uh debit posting first you
+don't need necessarily negative balance only if you're doing credit posting first you will receive the
+negative right so now here we do we created the customer right the funds are earmarked and now we want
+to debit the customer right now suppose during debit customer it it fails right like maybe a stop is
+added whatever is added whatever right now the debit customer fails and the uh funds are still earmarked
+right so in that in that scenario you would um you will reject the you will what do you do because
+your that's the thing is consolidation debit posting is consolidation and your credit is itemized now what
+do you do here in that scenario and we have our posting complete no we're not more portion complete
+posting failed basically correct but the funds are already into the writer
+no but but but in that case this is this can happen to a you are to clearing also clearing as well okay
+at that time but but that time individual status becomes the posting failed and we are then reporting
+this transaction to uh ops for doing the manual debit correct now here your posting is marked as
+already complete right posting complete or the credit side the transactions are actually in a posting
+complete complete no no no no it's pending it's it's posting is pending but your status is complete
+yeah status is complete posting failed which will indicate that debit side has failed that is the normal
+scenario for any debit any uh what do you call the clearing side thing the only thing is that because
+it's a no it's not nostro they have to be alert to the fact that they they had to complete the posting
+for the internal account not to the nostril so to distinguish that you don't use the complete
+because complete is only meant for nostril side of things from the outgoing perspective so you had to
+use something else so that the clear the operations clearly understands it is uh not to the nostril but to
+some other internal you got what i'm saying because when we put the status as complete the operations
+understand it to be any posting failure means they have to complete the posting for the nostril
+correctly yeah yeah not to some other account because then they will complete but then they will
+incorrectly complete to the nostril unless they are allowed to the fact that this is a book to book and
+other things they need to do a lot more checks
+the status won't tell them that will be a bit confusing to the operations and they can make mistakes
+yeah is that clear what i'm saying hello
+no no what i'm saying if you use uh see first and foremost there are two scenarios we have talked about
+one is uh to do that debit posting first or credit posting first in this scenario we are talking
+about a scenario where we do credit posting first correct correct correct we do the credit posting first
+when we do the credit posting first you are indicating the success of the credit posting using the status
+not the sub status because of the status right the credit side if we use the same value as uh complete
+and so if the operation c is the status complete and posting failed their instinctive behavior their
+normal understanding of it will be i have to complete the postings about and they will complete the
+posting let us say with a manual operation but the way they will complete is always to do it to the
+nostril never to any other because that's how they understood the status that that's how they
+understand the status complete correct so to avoid that kind of mistake what i'm proposing is for the
+book to book you can maybe come up with another status called b2b complete instead of something like
+complete merely complete so that way they understand okay now the b2b is completed but the nostril
+the debit side posting has failed then they can go and correct the debit side posting and put the
+money into the b2b internal account instead of to the regular complete
+based i mean instead of to the nostril which they would have understood by seeing just complete
+this is that clear yeah we get your point the only thing is right two two things then we have to
+look at here right um introducing a new status b2b complete right that's going to have an impact to
+lot of downstream notifications like big data and push notification everywhere right second thought to
+this is we have to maybe educate um operation that this is the scenario and this is what you might see
+and this is what the actions you have to take in such scenarios yeah yeah so they maybe it is really a
+requirements call at that point do they prefer a different status in which case we have to do
+down changes if not then we can leave with the existing status with understanding that the operations will be
+careful not to confuse themselves with it with this versus regular outgoing that's it correct yeah it's
+really a requirements choice at that point yeah okay so they're placing a scenario where your debit
+posting fails right if your credit posting fails then then of course you will have to release the
+year mark and then when you do a debit posting you have to adjust the batch again right to include
+the correct amount so that is something we have to basically uh take care okay
+yeah i i need to drop actually is that okay i mean is there anything else uh
+so only only thing i think this is basically for a few but but what i feel is that the same flow
+is also going to apply for all your uv flows also right so the same thing is also going to apply for
+uh sorry one second
+yeah can you repeat the question sorry i didn't hear that yeah so what i'm saying is the scenario what i
+have uh what discussing here is is for fu posting right the same thing is also going to apply for uv
+i think ue and the du bo everything will the only difference there is that um after the so there the posting
+happens first for the uh debit side that's the main difference okay so because the debit side have
+completes the posting so the the the situation is it will remain in pending state the the uh the status
+will remain while posting was completed if the posting is completed then you go about uh doing
+the credit side posting yeah so so there again you have to um it's it's all the standard thing you you
+just write the posting at that point to the credit side and make sure when the response comes back now
+we should be careful to update the status not the substratus so so the transition wise it's all simple
+from our from the manager perspective it is just a state change right so from pending to complete uh
+instead of complete it will go to b to b complete so to or or something like uh for in the case of
+book to book it will just go to the complete on the on the credit side posting completion just like
+what we will do for clearing side yeah uh it's um yeah there are some state sunday i mean either we
+have to if we are changing the state it is fine but if we are not changing the state we have to just check
+as uh uh in some of the processing and uh whether it has been a book to book or non book to do something
+different it's a bit tricky um for that matter uh uh what do you call uh i'm just thinking um
+what i suggest uh uh uh monica and whom is to keep this as b to b complete not as complete
+uh and if if the downstream has a problem do not send any big data notifications until
+everything is done and then at that point you move from b to b complete to complete and then send the
+big data notification i think that may be the cleanest way of doing things so that way
+uh because from our state transitions perspective you need to be able to distinguish this is a book to
+a book right and maybe now that we have to anyway do this uh debit posting first scenario for ue du everything
+right maybe to keep things simple we always do the du post uh we uh even for fu you can do the same thing
+you do the credit uh debit posting first and then do the credits so that way at least we don't need to
+over complicate things and uh you know always do the credit posting second and do the debit posting first
+so that way everything du or fu you don't need to distinguish everything will go into the same route
+right okay that will be easier because if you were to do that for fu then fu will do in one way and
+then the rest will do in another way rather you just do everything in a similar way in the case of book to
+book that may be the easiest way to do it i'm just thinking
+or if you want we can do some internal analysis and come back but but i think that's what probably
+will be the best and easiest way so that way we don't need to introduce whole lot of new statuses also
+just just either we have to have a b2b complete yeah i think that will be a good status to keep
+if the downstreams agree but if they don't we may still want to call it as b2b complete momentarily
+and then move it to complete once uh everything is done on both the postings
+so that b2b complete where do you want to at me okay so if you can say if you do debit posting first
+right that b2b posting when do you want to set it up when you receive the debit posting response or
+the credit posting response yeah basically the debit the credit posting has uh we need to know whether
+the the status for the credit posting is completed failed and everything correct
+that has to be tracked somehow we and we also have to have the fact that posting is completed on the
+debit side correct so we could have scenario debit side is successful credit side is failure how will
+you represent what kind of status will that be you you only have one posting failed correct
+that posting failed indicates uh which posting has failed is it the debit side posting fail or the
+credit side posting fill how do i know i can't just have a posting failed as a single status anymore
+correctly right okay so i need a way to do this thing so instead of that if i call it as let's say b2b
+pending spending is spending you don't need to see from pending if the book to book is completed i call it
+b2b complete if the book to book has failed i say b2b fail or b2b rejected let's say
+then i know at least that part has not worked right away correct
+then then the b2b rejected is like a temporary situation because until once uh the the uh reversal
+has taken place then i can mark it as a regular rejected and posting uh whatever right so that way
+we can do something easily and uh deal with it
+otherwise it will be uh i'm just thinking uh
+maybe give us some time maybe we need some additional discussions on this and then only come
+back because the way i'm thinking is but keeping b2b uh the status for the uh credit site posting
+will be the most natural way of doing things for the book to book in this scenario like b2b complete b2b
+rejected and uh b2b uh this thing and then finally if we if downstream has a problem or where it has a
+problem uh we we may be able to kind of normalize to reject that complete before finally sending it
+to the to uh to be downstream so that everything uh finally comes to the same status what they are used
+to but we may have to uh to track it independently until everything is done we may still have to have
+the b2b complete or b2b rejected okay or or alternatively if we can keep the status but then i had to look at the
+uh processing wise how we will do it keeping the same status it's up it's all something we need to analyze
+okay okay i can scale a follow-up maybe on wednesday and thursday to just um close this out uh
+karthik you and i'll try to see if if we introduce a new status that what is going to be the impact
+below downstreams
