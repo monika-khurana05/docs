@@ -1,0 +1,35 @@
+Perform an evidence-backed impact analysis for [PR / commit / proposed change]
+against [target branch].
+
+Trace the affected code end to end. Inspect direct and transitive callers,
+downstream dependencies, interfaces, implementations, configuration,
+database access, events and external integrations. Include dynamically
+wired dependencies where relevant.
+
+Evaluate:
+- Behaviour changes and business invariants
+- API/event contracts and backward compatibility
+- State changes, transactions and other side effects
+- Failure handling, retries, idempotency and concurrency
+- Performance, security and operational impact
+- Deployment order, migrations, feature flags and rollback
+- Existing regression coverage and missing test scenarios
+
+For every finding, provide:
+1. Affected component and execution path
+2. Before → after behaviour
+3. Impact, trigger conditions and severity
+4. Evidence with file paths, symbols and line numbers
+5. Required validation or mitigation
+
+Separate confirmed impacts, potential risks and unknowns.
+Do not infer “no impact” from missing references or passing tests.
+Identify anything outside this repository that needs verification.
+
+Return:
+- Brief impact summary
+- Impact matrix
+- Prioritised regression test plan
+- Open questions and confidence limits
+
+Analyse only; do not modify code.
