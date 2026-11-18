@@ -1,0 +1,25 @@
+Copy this prompt into the agent that will update Confluence. It gives you a child page with the revised workflow and a diagram for the Basel pilot.
+Writing
+Create a child page under the existing CPX Requirement Agent Workflow Confluence page. Title it Basel FDLC Pilot — Updated Agent Workflow. Use the workflow below as the proposed design for the pilot.
+Create a top-down workflow diagram and add a short table below it showing the input, action and output for each stage. Use separate diagram groups for RIA and the Devin Application Playbook so their internal steps are visible.
+Workflow to draw
+Start — Basel requirement input. Start with the source requirement or change request and its reference.
+Atom — Requirement decomposition. Extract atomic requirements in JSON. Give each requirement a stable REQ ID and a link to its source.
+RIA — Programme-level analysis and epic creation. Show these three steps inside the RIA group, in this order:
+Jira-based Drift checks previous Jira delivery and documented capabilities for potential reuse. Carry forward the matches, evidence and gaps.
+Impact analysis uses the requirements, Jira Drift findings and the curated capability context to identify impacted applications and their responsibilities. Produce a C4 System Context diagram.
+Epic Genie creates a Jira epic for each application that needs an implementation assessment. Include the applicable REQ IDs, target CSI, expected outcomes and dependencies.
+Devin Application Playbook — One run per application epic. Fan out from Epic Genie to the affected applications. Show the following four parts inside the playbook group:
+Part 1 — Code-level Drift. Compare each requirement with the target CSI’s code and configuration. Classify it as Global Clone, Modify, or Net New, with supporting evidence. Apply the classification at requirement level, since one epic can contain all three.
+Part 2 — Net New architecture design. For Net New items, produce an application-level architecture flow diagram showing the affected components, interactions and proposed changes. Attach it to the architecture task linked to the epic.
+Part 3 — Design validation and human acceptance. The review agent checks the proposed design against the requirements and implementation evidence, then records facts, gaps and proposed corrections. A human reviewer accepts the design revision or returns it to Part 2 for rework. Show this decision and loop in the diagram.
+Part 4 — Story creation. Create stories for Global Clone, Modify and Net New based on the scoped work. Clone stories cover any required reuse, configuration or validation. Modify stories cover the confirmed delta. Net New stories use the accepted design. Link each story to its REQ IDs and application epic.
+Jira-to-code. Devin implements the stories that require code or configuration changes, runs the relevant checks and raises PRs. Route validation-only stories to the applicable tests.
+Proof Packet validation. Validate each PR against its story and acceptance criteria. Capture the requirement-to-change links, test evidence and unresolved findings. Return failed checks to Jira-to-code for correction.
+Assemble all changes. Bring the validated application changes together in the assembly environment. Record the build and configuration versions included in the run.
+Run assembly test suites. Execute the applicable suites against the assembled build and capture results against the requirement IDs. Include failed and skipped scenarios.
+Generate the Release Confidence Report. Summarise requirement coverage, the assembled versions, Proof Packet outcomes, assembly results, open defects and remaining risks.
+Diagram layout
+Show the main flow as Start → Atom → RIA → Devin Application Playbook → Jira-to-code → Proof Packet → Assemble Changes → Assembly Test Suites → Release Confidence Report.
+Inside the Devin group, branch after Part 1. Net New goes through Parts 2 and 3 before Part 4. Global Clone and Modify go to Part 4 with their Drift findings. After Proof Packet validation, join the application branches at Assemble all changes. Use short labels in the diagram and put evidence and ownership details in the table.
+End the page with the pilot success criterion. The Basel demo should trace at least one REQ ID from its source through the application epic, Drift classification, applicable design approval, story, Proof Packet and assembly result into the Release Confidence Report.
